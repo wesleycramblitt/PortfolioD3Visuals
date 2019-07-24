@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<div id="Programming">
+    <h4>Programming Languages</h4>
+</div>
+
+<div id="Databases">
+    <h4>Databases</h4>
+</div>
+
+<div id="ServerFrameworks">
+    <h4>Server Frameworks/Libraries</h4>
+</div>
+
+<div id="ClientFrameworks">
+    <h4>Client Frameworks/Libraries</h4>
+</div>
+
+
+<style>
+text {
+    font-size: 1.5em;
+}
+
+.epic {
+    fill: rgb(85, 20, 85);
+    }
+
+.legendary {
+    fill: gold;
+}
+
+.veryRare {
+    fill: rgb(17, 128, 197);
+}
+
+.rare {
+    fill: gray;
+}
+
+.common {
+    fill: lightgray;
+}
+
+.grid line {
+  stroke: lightgrey;
+  stroke-opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+
+.grid path {
+    stroke-width: 0;
+}
+</style>
+<script>
+function horizontalBar(selector, data,xLabels,xColors) {
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 5, right: 20, bottom: 30, left: 120},
+        width = 1000 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
+    // set the ranges
+    var y = d3.scaleBand()
+            .range([height, 0])
+            .padding(0.1);
+
+    var x = d3.scaleBand()
+            .range([0, width])
+            .padding(0.1);
+
+
+    // append the svg object to the body of the page
+    var svg = d3.select(selector)
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    // Parse the Data
+    data = data.sort(function(a,b) {
+        return d3.descending(b.value, a.value);
+    });
+
+    // Scale the range of the data in the domains
+    x.domain(xLabels);
+    y.domain(data.map(function(d) { return d.name; }));
+
+    // append the rectangles for the bar chart
+    svg.selectAll(".bar")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("class", function (d) {
+        return xColors[d.value-1] + " bar";
+    })
+    .attr("width", function(d) {return x(xLabels[d.value-1])+x.bandwidth()/2; } )
+    .attr("y", function(d) { return y(d.name); })
+    .attr("height", y.bandwidth());
+
+
+    //Add vertical gridlines (ticks on the axis)
+    function horizontalGridLines() {		
+        return d3.axisBottom(x)
+            .ticks(5)
+    }
+
+    svg.append("g")			
+      .attr("class", "grid")
+      .attr("transform", "translate(0," + height + ")")
+      .call(horizontalGridLines()
+          .tickSize(-height)
+          .tickFormat("")
+      )
+
+    // add the x Axis
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).tickSize(0))
+        .call(g => g.select(".domain").remove());//removes line
+
+    // add the y Axis
+    svg.append("g")
+        .call(d3.axisLeft(y).tickSize(0))
+        .call(g => g.select(".domain").remove());//removes line
+
+
+    //Animate on hover
+    svg.on("mouseover", function(d,i) {
+            svg.selectAll(".bar")
+            .attr("width", 0);
+
+            // Animation
+            svg.selectAll(".bar")
+            .transition()
+            .duration(800)
+            // .attr("x", function(d) { return 0; })
+            .attr("width", function(d) { return x(xLabels[d.value-1]) + x.bandwidth()/2; })
+            .delay(function(d,i){ return(i*100)})
+    });
+
+}
+
+//Main
+var labels = ["Interested", "Comfortable", "Experienced", "Adept", "Master"];
+var cssClasses = ["common","rare","veryRare","legendary","epic"];
+
+var programming = [
+    {name:"JavaScript",value:5},
+    {name:"C#",value:5},
+    {name:"PHP",value:3},
+    {name:"Python",value:4},
+    {name:"Java",value:3},
+    {name:"C++",value:2},
+   {name:"C",value:1},
+];
+
+horizontalBar("#Programming", programming,labels,cssClasses);
+
+
+var databases = [
+    {name:"MSSQL",value:4},
+    {name:"PostgreSQL",value:3},
+    {name:"SQLite",value:3},
+    {name:"MySQL",value:3},
+    {name:"MongoDB",value:2},
+]
+
+horizontalBar("#Databases", databases,labels,cssClasses);
+
+var serverFrameworks = [
+    {name:"ASP.NET MVC",value:4},
+    {name:"ASP.NET Core",value:3},
+    {name:"Node + Express",value:3},
+    {name:"Tensorflow.js",value:1},
+]
+
+horizontalBar("#ServerFrameworks", serverFrameworks,labels,cssClasses);
+
+var clientFrameworks = [
+    {name:"Redux",value:1},
+    {name:"Knockout.js",value:3},
+    {name:"D3.js",value:3},
+    {name:"React",value:4}
+
+]
+
+horizontalBar("#ClientFrameworks", clientFrameworks,labels,cssClasses);
+
+
+</script>
